@@ -4,7 +4,7 @@ const { testConnection, checkUser } = require('./db-config');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'quiz/public')));
 
 // Hauptroute für die Startseite
 app.get('/', (req, res) => {
