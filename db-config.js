@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -9,36 +10,45 @@ const pool = new Pool({
 
 // Test-Funktion für die Verbindung
 async function testConnection() {
+    const client = await pool.connect();
     try {
-        const client = await pool.connect();
         const result = await client.query('SELECT NOW()');
         console.log('Datenbankverbindung erfolgreich:', result.rows[0]);
-        client.release();
         return true;
     } catch (err) {
         console.error('Fehler bei der Datenbankverbindung:', err);
         return false;
+    } finally {
+        client.release();
     }
 }
 
 // Benutzer-Login überprüfen
 async function checkUser(email, password) {
+    const client = await pool.connect();
     try {
-        const client = await pool.connect();
         const result = await client.query(
             'SELECT * FROM users WHERE email = $1',
             [email]
         );
-        client.release();
 
         if (result.rows.length > 0) {
-            const valid = await bcrypt.compare(password, result.rows[0].password_hash);
-            return valid ? result.rows[0] : null;
+            const user = result.rows[0];
+            const valid = await bcrypt.compare(password, user.password_hash);
+            
+            if (valid) {
+                return {
+                    email: user.email,
+                    id: user.id
+                };
+            }
         }
         return null;
     } catch (err) {
         console.error('Fehler beim Login:', err);
-        return null;
+        throw err; // Werfe den Fehler, damit er in der Route behandelt werden kann
+    } finally {
+        client.release();
     }
 }
 

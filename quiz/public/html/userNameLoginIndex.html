@@ -10,7 +10,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Flexbox-Kinder -->
         <div class="header">
             <div class="backup-Username">
                 <a href="/html/register.html" id="backButton" class="button-link">Registrieren</a>
@@ -18,8 +17,8 @@
         </div>
 
         <div class="containerUsername">
-            <!-- Login-Formular -->
-            <form id="loginForm" action="/api/login" method="POST">
+            <!-- Entfernen Sie method="POST" und action="/api/login" -->
+            <form id="loginForm">
                 <div class="username">
                     <label for="email">E-Mail: </label>
                     <input type="text" id="email" name="email" class="e-email-answer" required>
