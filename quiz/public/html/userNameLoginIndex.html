@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <link rel="icon" type="image/x-icon" href="/picture/IU-Logo.svg">
+    <link rel="stylesheet" href="/css/quiz.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Flexbox-Kinder -->
+        <div class="header">
+            <div class="backup-Username">
+                <a href="/html/register.html" id="backButton" class="button-link">Registrieren</a>
+            </div>
+        </div>
+
+        <div class="containerUsername">
+            <!-- Login-Formular -->
+            <form id="loginForm" action="/api/login" method="POST">
+                <div class="username">
+                    <label for="email">E-Mail: </label>
+                    <input type="text" id="email" name="email" class="e-email-answer" required>
+                </div>
+                <div class="username">
+                    <label for="password">Passwort: </label>
+                    <input type="password" id="password" name="password" class="passwort-answer" required>
+                </div>
+                <div class="anmelden">
+                    <button type="submit" id="anmeldenButton" class="anmelden-link">Anmelden</button>
+                </div>
+            </form>
+        </div>
+
+        <main>
+            <p>Hier kannst du dich anmelden.</p>
+        </main>
+    </div>
+
+    <script src="/js/userNameLoginIndex.js"></script>
+</body>
+</html>
