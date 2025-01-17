@@ -6,6 +6,11 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Hauptroute für die Startseite
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'quiz/public/html/userNameLoginIndex.html'));
+});
+
 // Test-Route für Datenbankverbindung
 app.get('/api/test-db', async (req, res) => {
     const isConnected = await testConnection();
