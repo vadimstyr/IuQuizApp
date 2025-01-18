@@ -228,6 +228,21 @@ app.delete('/api/questions/:id', async (req, res) => {
     }
 });
 
+app.post('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: 'Fehler beim Logout'
+            });
+        }
+        res.json({
+            success: true,
+            message: 'Erfolgreich ausgeloggt'
+        });
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
    console.log(`Server läuft auf Port ${PORT}`);
