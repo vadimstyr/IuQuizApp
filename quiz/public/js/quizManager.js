@@ -132,20 +132,30 @@ $(document).ready(() => {
     // Frage löschen
     $('#deleteQuestion').click(async () => {
         if (userQuestions.length === 0) return;
-
+    
+        const questionId = userQuestions[currentQuestionIndex].id;
+    
         try {
-            await $.ajax({
-                url: `/api/questions/${userQuestions[currentQuestionIndex].id}`,
+            const response = await $.ajax({
+                url: `/api/questions/${questionId}`,
                 method: 'DELETE',
                 xhrFields: {
                     withCredentials: true
                 }
             });
-
-            await loadUserQuestions();
+    
+            if (response.success) {
+                await loadUserQuestions(); // Lädt die Fragen neu
+                if (currentQuestionIndex >= userQuestions.length) {
+                    currentQuestionIndex = Math.max(0, userQuestions.length - 1);
+                }
+                displayCurrentQuestion();
+            } else {
+                alert('Fehler beim Löschen der Frage');
+            }
         } catch (error) {
             console.error('Fehler beim Löschen:', error);
-            alert('Fehler beim Löschen der Frage.');
+            alert('Fehler beim Löschen der Frage');
         }
     });
 

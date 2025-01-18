@@ -189,6 +189,44 @@ app.get('/api/my-quiz-questions', async (req, res) => {
         });
     }
 });
+// DELETE Route für Fragen
+app.delete('/api/questions/:id', async (req, res) => {
+    try {
+        const questionId = req.params.id;
+        const userEmail = req.session?.user?.email;
+
+        if (!userEmail) {
+            return res.status(401).json({
+                success: false,
+                message: 'Nicht eingeloggt'
+            });
+        }
+
+        // Prüfen ob die Frage dem Benutzer gehört und dann löschen
+        const result = await pool.query(
+            'DELETE FROM quiz_questions WHERE id = $1 AND creator_email = $2 RETURNING *',
+            [questionId, userEmail]
+        );
+
+        if (result.rows.length > 0) {
+            res.json({
+                success: true,
+                message: 'Frage gelöscht'
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                message: 'Frage nicht gefunden oder keine Berechtigung'
+            });
+        }
+    } catch (error) {
+        console.error('Fehler beim Löschen der Frage:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fehler beim Löschen der Frage'
+        });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
