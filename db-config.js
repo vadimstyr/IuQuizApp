@@ -52,9 +52,12 @@ async function checkUser(email, password) {
     }
 }
 
-const getQuestions = async () => {
+const getQuestions = async (userEmail) => {
     try {
-        const result = await pool.query('SELECT * FROM quiz_questions ORDER BY RANDOM()');
+        const result = await pool.query(
+            'SELECT * FROM quiz_questions WHERE creator_email = $1 ORDER BY created_at DESC',
+            [userEmail]
+        );
         return result.rows;
     } catch (error) {
         console.error('Datenbankfehler beim Abrufen der Fragen:', error);
