@@ -249,33 +249,34 @@ app.get('/api/other-questions', async (req, res) => {
         const userEmail = req.session?.user?.email;
         
         if (!userEmail) {
+            console.log('Kein Benutzer in Session');
             return res.json({
                 success: false,
                 message: 'Nicht eingeloggt'
             });
         }
 
-        const questions = await getOtherQuestions(userEmail);
+        console.log('Suche Fragen für Benutzer:', userEmail); // Debug-Log
+
+        const result = await pool.query(`
+            SELECT * FROM quiz_questions 
+            WHERE creator_email != $1 
+            ORDER BY RANDOM() 
+            LIMIT 10
+        `, [userEmail]);
         
-        // Wenn keine Fragen gefunden wurden
-        if (questions.length === 0) {
-            return res.json({
-                success: false,
-                message: 'Keine Fragen von anderen Benutzern verfügbar'
-            });
-        }
+        console.log('Gefundene Fragen:', result.rows.length); // Debug-Log
 
         res.json({
             success: true,
-            questions: questions
+            questions: result.rows
         });
 
     } catch (error) {
         console.error('Fehler beim Laden der Quiz-Fragen:', error);
         res.json({
             success: false,
-            message: 'Fehler beim Laden der Fragen',
-            error: error.message
+            message: 'Fehler beim Laden der Fragen'
         });
     }
 });

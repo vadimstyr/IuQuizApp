@@ -6,6 +6,7 @@ $(document).ready(() => {
 
     const loadOtherQuestions = async () => {
         try {
+            console.log('Lade Fragen von anderen Benutzern...'); // Debug-Log
             const response = await $.ajax({
                 url: '/api/other-questions',
                 method: 'GET',
@@ -13,20 +14,17 @@ $(document).ready(() => {
                     withCredentials: true
                 }
             });
-
+            console.log('Server-Antwort:', response); // Debug-Log
+    
             if (response.success && response.questions.length > 0) {
                 questions = response.questions;
                 updateDisplay();
-                $('.answer-container').show();
-                $('#nextQuestion').show();
             } else {
+                console.log('Keine Fragen gefunden:', response.message);
                 $('.question-container').html('<h2>Keine Fragen von anderen Benutzern verfügbar.</h2>');
-                $('.answer-container').hide();
-                $('#nextQuestion').hide();
             }
         } catch (error) {
-            console.error('Fehler beim Laden der Fragen:', error);
-            $('.question-container').html('<h2>Fehler beim Laden der Fragen.</h2>');
+            console.error('Fehler:', error);
         }
     };
 
