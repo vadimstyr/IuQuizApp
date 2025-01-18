@@ -40,12 +40,25 @@ $(document).ready(() => {
     // Fragen laden
     const loadUserQuestions = async () => {
         try {
-            const response = await $.get('/api/questions');
-            userQuestions = response;
-            updateQuestionCount();
-            displayCurrentQuestion();
+            const response = await $.ajax({
+                url: '/api/questions',
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+    
+            console.log('Geladene Fragen:', response);
+    
+            if (response.success) {
+                userQuestions = response.data;
+                displayQuestions(); // Funktion zum Anzeigen der Fragen
+            } else {
+                throw new Error(response.message);
+            }
         } catch (error) {
             console.error('Fehler beim Laden der Fragen:', error);
+            alert('Fehler beim Laden Ihrer Fragen');
         }
     };
 
