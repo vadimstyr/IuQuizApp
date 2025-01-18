@@ -8,13 +8,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'quiz/public')));
 
 app.use(session({
-   secret: 'quiz-app-secret-2024',
-   resave: false,
-   saveUninitialized: false,
-   cookie: { 
-       secure: true,
-       sameSite: 'none'
-   }
+    secret: 'quiz-app-secret-2024',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { 
+        secure: true,
+        maxAge: 1000 * 60 * 60 * 24 // 24 Stunden
+    },
+    proxy: true // Wichtig für Heroku
 }));
 
 // Hauptroute für die Startseite
