@@ -3,7 +3,7 @@ $(document).ready(() => {
     let userQuestions = [];
     let currentQuestionIndex = 0;
 
-    // Die ursprüngliche, funktionierende Auth-Check Methode
+    // Auth-Check Methode
     const checkAuthAndLoadUser = async () => {
         console.log('Start: Auth-Check');
         try {
@@ -65,22 +65,19 @@ $(document).ready(() => {
         }
     };
 
-
-    // Verbesserte Frage speichern Funktion
+    // Frage speichern
     $('#saveQuestion').click(async () => {
         if (userQuestions.length >= 10) {
             alert('Sie können maximal 10 Fragen erstellen!');
             return;
         }
     
-        // Überprüfen Sie, ob currentUser gesetzt ist
         if (!currentUser) {
             console.error('Kein Benutzer eingeloggt');
             alert('Bitte melden Sie sich erneut an.');
             return;
         }
     
-        // Validierung der Eingaben
         const question = $('#questionInput').val().trim();
         const answerA = $('#answerA').val().trim();
         const answerB = $('#answerB').val().trim();
@@ -88,51 +85,49 @@ $(document).ready(() => {
         const answerD = $('#answerD').val().trim();
         const correctAnswer = $('#correctAnswer').val().trim().toUpperCase();
 
-    // Validierung für correct_answer
-    if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
-        alert('Bitte füllen Sie alle Felder aus.');
-        return;
-    }
-
-    // Debug-Log vor dem Senden
-    console.log('Current User:', currentUser);
-
-    const questionData = {
-        creator_email: currentUser,
-        question: question,
-        answer_a: answerA,
-        answer_b: answerB,
-        answer_c: answerC,
-        answer_d: answerD,
-        correct_answer: correctAnswer
-    };
-
-    try {
-        console.log('Sende Frage mit Daten:', questionData);
-        const response = await $.ajax({
-            url: '/api/questions',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(questionData),
-            xhrFields: {
-                withCredentials: true
-            }
-        });
-
-        console.log('Server-Antwort:', response);
-        
-        if (response.success) {
-            alert('Frage erfolgreich gespeichert!');
-            clearInputs();
-            await loadUserQuestions();
-        } else {
-            throw new Error(response.message);
+        if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
+            alert('Bitte füllen Sie alle Felder aus.');
+            return;
         }
-    } catch (error) {
-        console.error('Fehler beim Speichern:', error);
-        alert('Fehler beim Speichern: ' + (error.responseJSON?.message || error.message));
-    }
-});
+
+        console.log('Current User:', currentUser);
+
+        const questionData = {
+            creator_email: currentUser,
+            question: question,
+            answer_a: answerA,
+            answer_b: answerB,
+            answer_c: answerC,
+            answer_d: answerD,
+            correct_answer: correctAnswer
+        };
+
+        try {
+            console.log('Sende Frage mit Daten:', questionData);
+            const response = await $.ajax({
+                url: '/api/questions',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(questionData),
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+
+            console.log('Server-Antwort:', response);
+            
+            if (response.success) {
+                alert('Frage erfolgreich gespeichert!');
+                clearInputs();
+                await loadUserQuestions();
+            } else {
+                throw new Error(response.message);
+            }
+        } catch (error) {
+            console.error('Fehler beim Speichern:', error);
+            alert('Fehler beim Speichern: ' + (error.responseJSON?.message || error.message));
+        }
+    });
 
     // Frage löschen
     $('#deleteQuestion').click(async () => {
@@ -141,7 +136,10 @@ $(document).ready(() => {
         try {
             await $.ajax({
                 url: `/api/questions/${userQuestions[currentQuestionIndex].id}`,
-                method: 'DELETE'
+                method: 'DELETE',
+                xhrFields: {
+                    withCredentials: true
+                }
             });
 
             await loadUserQuestions();
@@ -168,28 +166,34 @@ $(document).ready(() => {
 
     // Hilfsfunktionen
     const updateQuestionCount = () => {
-        $('#questionCount').text(userQuestions.length);
+        $('.question-counter').text(`(${userQuestions.length}/10)`);
     };
 
     const displayCurrentQuestion = () => {
+        updateQuestionCount();
+        
         if (userQuestions.length === 0) {
-            $('#previewQuestion').text('Keine Fragen vorhanden');
-            $('#previewAnswers').empty();
-            $('#correctAnswerDisplay').text('');
-            $('#currentQuestionNumber').text('Frage 0/0');
+            $('.questions-preview').empty();
             return;
         }
 
         const question = userQuestions[currentQuestionIndex];
-        $('#previewQuestion').text(question.question);
-        $('#previewAnswers').html(`
-            <div>A: ${question.answer_a}</div>
-            <div>B: ${question.answer_b}</div>
-            <div>C: ${question.answer_c}</div>
-            <div>D: ${question.answer_d}</div>
+        $('.questions-preview').html(`
+            <h3>${question.question}</h3>
+            <div class="answers">
+                <p>A: ${question.answer_a}</p>
+                <p>B: ${question.answer_b}</p>
+                <p>C: ${question.answer_c}</p>
+                <p>D: ${question.answer_d}</p>
+            </div>
+            <p class="correct-answer">Richtige Antwort: ${question.correct_answer}</p>
         `);
-        $('#correctAnswerDisplay').text(`Richtige Antwort: ${question.correct_answer}`);
         $('#currentQuestionNumber').text(`Frage ${currentQuestionIndex + 1}/${userQuestions.length}`);
+    };
+
+    // Alias-Funktion für Kompatibilität
+    const displayQuestions = () => {
+        displayCurrentQuestion();
     };
 
     const clearInputs = () => {
