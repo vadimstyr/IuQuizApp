@@ -170,25 +170,39 @@ $(document).ready(() => {
     };
 
     const displayCurrentQuestion = () => {
-        updateQuestionCount();
+        // Zähler aktualisieren
+        $('#questionCount').text(userQuestions.length);
+        $('#remainingQuestions').text(10 - userQuestions.length);
         
         if (userQuestions.length === 0) {
-            $('.questions-preview').empty();
+            $('#previewQuestion').text('');
+            $('#previewAnswers').empty();
+            $('#correctAnswerDisplay').text('');
+            $('#currentQuestionNumber').text('Frage 0/0');
             return;
         }
-
+    
         const question = userQuestions[currentQuestionIndex];
-        $('.questions-preview').html(`
-            <h3>${question.question}</h3>
-            <div class="answers">
-                <p>A: ${question.answer_a}</p>
-                <p>B: ${question.answer_b}</p>
-                <p>C: ${question.answer_c}</p>
-                <p>D: ${question.answer_d}</p>
-            </div>
-            <p class="correct-answer">Richtige Antwort: ${question.correct_answer}</p>
-        `);
-        $('#currentQuestionNumber').text(`Frage ${currentQuestionIndex + 1}/${userQuestions.length}`);
+        if (question) {
+            // Vorschau befüllen
+            $('#previewQuestion').text(question.question);
+            $('#previewAnswers').html(`
+                <div class="preview-answer">
+                    <span>A:</span> ${question.answer_a}
+                </div>
+                <div class="preview-answer">
+                    <span>B:</span> ${question.answer_b}
+                </div>
+                <div class="preview-answer">
+                    <span>C:</span> ${question.answer_c}
+                </div>
+                <div class="preview-answer">
+                    <span>D:</span> ${question.answer_d}
+                </div>
+            `);
+            $('#correctAnswerDisplay').text(`Richtige Antwort: ${question.correct_answer}`);
+            $('#currentQuestionNumber').text(`Frage ${currentQuestionIndex + 1}/${userQuestions.length}`);
+        }
     };
 
     // Alias-Funktion für Kompatibilität
