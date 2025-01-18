@@ -100,14 +100,30 @@ const saveQuestion = async (questionData) => {
         throw error;
     }
 };
-
+const getOtherQuestions = async (userEmail) => {
+    try {
+        // Zufällige Auswahl von 10 Fragen von anderen Benutzern
+        const result = await pool.query(`
+            SELECT * FROM quiz_questions 
+            WHERE creator_email != $1 
+            ORDER BY RANDOM() 
+            LIMIT 10
+        `, [userEmail]);
+        
+        return result.rows;
+    } catch (error) {
+        console.error('Fehler beim Abrufen der fremden Fragen:', error);
+        throw error;
+    }
+};
 
 module.exports = {
     pool,
     testConnection,
     checkUser,
     getQuestions,
-    saveQuestion  
+    saveQuestion,
+    getOtherQuestions  
 };
 
 

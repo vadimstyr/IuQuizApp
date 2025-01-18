@@ -243,6 +243,43 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
+// Route für Fragen von anderen Benutzern
+app.get('/api/other-questions', async (req, res) => {
+    try {
+        const userEmail = req.session?.user?.email;
+        
+        if (!userEmail) {
+            return res.json({
+                success: false,
+                message: 'Nicht eingeloggt'
+            });
+        }
+
+        const questions = await getOtherQuestions(userEmail);
+        
+        // Wenn keine Fragen gefunden wurden
+        if (questions.length === 0) {
+            return res.json({
+                success: false,
+                message: 'Keine Fragen von anderen Benutzern verfügbar'
+            });
+        }
+
+        res.json({
+            success: true,
+            questions: questions
+        });
+
+    } catch (error) {
+        console.error('Fehler beim Laden der Quiz-Fragen:', error);
+        res.json({
+            success: false,
+            message: 'Fehler beim Laden der Fragen',
+            error: error.message
+        });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
    console.log(`Server läuft auf Port ${PORT}`);
