@@ -1,4 +1,4 @@
-javascriptCopy$(document).ready(() => {
+$(document).ready(() => {
     // Logout-Handler
     $('.login-Username #username').click(async (e) => {
         e.preventDefault(); // Verhindert Standard-Link-Verhalten
