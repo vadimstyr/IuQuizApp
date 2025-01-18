@@ -62,11 +62,39 @@ const getQuestions = async () => {
     }
 };
 
+const saveQuestion = async (questionData) => {
+    try {
+        const query = `
+            INSERT INTO quiz_questions 
+            (creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *
+        `;
+        const values = [
+            questionData.creator_email,
+            questionData.question,
+            questionData.answer_a,
+            questionData.answer_b,
+            questionData.answer_c,
+            questionData.answer_d,
+            questionData.correct_answer
+        ];
+        
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        console.error('Fehler beim Speichern der Frage:', error);
+        throw error;
+    }
+};
+
+
 module.exports = {
     pool,
     testConnection,
     checkUser,
-    getQuestions
+    getQuestions,
+    saveQuestion  
 };
 
 
