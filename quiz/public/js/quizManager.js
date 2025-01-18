@@ -3,10 +3,11 @@ $(document).ready(() => {
     let userQuestions = [];
     let currentQuestionIndex = 0;
 
-    // Auth-Check mit erweiterten Debug-Logs
+    // Die ursprüngliche, funktionierende Auth-Check Methode
     const checkAuthAndLoadUser = async () => {
         console.log('Start: Auth-Check');
         try {
+            console.log('Sende Auth-Request...');
             const response = await $.ajax({
                 url: '/api/check-auth',
                 method: 'GET',
@@ -14,21 +15,25 @@ $(document).ready(() => {
                     withCredentials: true
                 }
             });
-            console.log('Auth-Response:', response);
-    
-            if (!response.isLoggedIn || !response.email) {
-                console.log('Nicht eingeloggt oder keine E-Mail');
-                window.location.href = '/html/userNameLoginIndex.html';
+            console.log('Auth-Response erhalten:', response);
+
+            if (!response.isLoggedIn) {
+                console.log('Nicht eingeloggt - Weiterleitung wird vorbereitet...');
+                setTimeout(() => {
+                    window.location.href = '/html/userNameLoginIndex.html';
+                }, 5000);
                 return;
             }
             
+            console.log('Login bestätigt für:', response.email);
             currentUser = response.email;
-            console.log('CurrentUser gesetzt:', currentUser);
             $('#userEmail').text(currentUser);
             await loadUserQuestions();
         } catch (error) {
-            console.error('Auth-Fehler:', error);
-            window.location.href = '/html/userNameLoginIndex.html';
+            console.error('Detaillierter Auth-Fehler:', error);
+            setTimeout(() => {
+                window.location.href = '/html/userNameLoginIndex.html';
+            }, 5000);
         }
     };
 
@@ -44,20 +49,13 @@ $(document).ready(() => {
         }
     };
 
-    // Frage speichern
+    // Verbesserte Frage speichern Funktion
     $('#saveQuestion').click(async () => {
-        // Erst prüfen ob User eingeloggt ist
-        if (!currentUser) {
-            alert('Bitte melden Sie sich erneut an.');
-            window.location.href = '/html/userNameLoginIndex.html';
-            return;
-        }
-    
         if (userQuestions.length >= 10) {
             alert('Sie können maximal 10 Fragen erstellen!');
             return;
         }
-    
+
         // Validierung der Eingaben
         const question = $('#questionInput').val().trim();
         const answerA = $('#answerA').val().trim();
@@ -65,12 +63,12 @@ $(document).ready(() => {
         const answerC = $('#answerC').val().trim();
         const answerD = $('#answerD').val().trim();
         const correctAnswer = $('#correctAnswer').val().trim();
-    
+
         if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
             alert('Bitte füllen Sie alle Felder aus.');
             return;
         }
-    
+
         const questionData = {
             creator_email: currentUser,
             question: question,
@@ -80,23 +78,23 @@ $(document).ready(() => {
             answer_d: answerD,
             correct_answer: correctAnswer
         };
-    
+
         try {
-            console.log('Speichere Frage:', questionData); // Debug-Log
+            console.log('Speichere Frage:', questionData);
             const response = await $.ajax({
                 url: '/api/questions',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(questionData)
             });
-            console.log('Antwort vom Server:', response); // Debug-Log
-    
+            console.log('Antwort vom Server:', response);
+
             alert('Frage erfolgreich gespeichert!');
             clearInputs();
             await loadUserQuestions();
         } catch (error) {
-            console.error('Detaillierter Fehler beim Speichern:', error);
-            alert(`Fehler beim Speichern der Frage: ${error.responseText || error.message}`);
+            console.error('Fehler beim Speichern:', error);
+            alert('Fehler beim Speichern der Frage.');
         }
     });
 
