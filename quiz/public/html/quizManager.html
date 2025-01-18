@@ -15,8 +15,14 @@
            <span id="userEmail" class="user-email"></span>
        </div>
 
+       <!-- Neue Meldungsanzeige -->
+       <div id="errorMessage" class="message-box"></div>
+
        <div class="quiz-creation">
-           <h2 class="section-title">Quiz-Frage erstellen (<span id="questionCount">0</span>/10)</h2>
+           <h2 class="section-title">
+               Quiz-Frage erstellen (<span id="questionCount">0</span>/10)
+               <span class="remaining-questions">Noch <span id="remainingQuestions">10</span> Fragen möglich</span>
+           </h2>
            
            <div class="input-group">
                <label class="input-label">
@@ -60,7 +66,10 @@
                </label>
            </div>
 
-           <button id="saveQuestion" class="primary-button">Frage speichern</button>
+           <div class="button-group">
+               <button id="saveQuestion" class="primary-button">Frage speichern</button>
+               <button id="clearForm" class="secondary-button">Formular leeren</button>
+           </div>
        </div>
 
        <div class="quiz-preview">
@@ -78,11 +87,13 @@
                <p id="correctAnswerDisplay" class="correct-answer-display"></p>
            </div>
            
-           <button id="deleteQuestion" class="danger-button">Frage löschen</button>
+           <div class="button-group">
+               <button id="editQuestion" class="secondary-button">Frage bearbeiten</button>
+               <button id="deleteQuestion" class="danger-button">Frage löschen</button>
+           </div>
        </div>
    </div>
 
    <script src="/js/quizManager.js"></script>
 </body>
 </html>
-

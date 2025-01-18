@@ -1,7 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { testConnection, checkUser } = require('./db-config');
-
+const { testConnection, checkUser, getQuestions } = require('./db-config'); // getQuestions hinzufügen
 
 const app = express();
 app.use(express.json());
@@ -40,6 +39,26 @@ app.post('/api/login', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Server Fehler'
+        });
+    }
+});
+
+// Neue Route: Auth-Check
+app.get('/api/check-auth', async (req, res) => {
+    // Hier können Sie später eine echte Session-Überprüfung implementieren
+    res.json({ isLoggedIn: true });
+});
+
+// Neue Route: Fragen abrufen
+app.get('/api/questions', async (req, res) => {
+    try {
+        const questions = await getQuestions();
+        res.json(questions);
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Fragen:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Fehler beim Laden der Fragen'
         });
     }
 });

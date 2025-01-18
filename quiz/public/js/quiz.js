@@ -7,15 +7,30 @@ $(document).ready(() => {
 
     const checkAuthAndLoadQuestions = async () => {
         try {
-            const authResponse = await $.get('/api/check-auth');
+            // API-Endpunkt für Auth-Check
+            const authResponse = await $.ajax({
+                url: '/api/check-auth',
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+            
             if (!authResponse.isLoggedIn) {
                 $('#nextQuestion').hide();
                 $('.answer-container').hide();
                 return;
             }
 
-            // Laden der Fragen aus der PostgreSQL Datenbank
-            const questionsResponse = await $.get('/api/questions');
+            // API-Endpunkt für Fragen laden
+            const questionsResponse = await $.ajax({
+                url: '/api/questions',
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+            
             questions = questionsResponse;
             if (questions.length > 0) {
                 displayQuestion(0);
@@ -23,15 +38,24 @@ $(document).ready(() => {
                 $('#nextQuestion').show();
                 $('.answer-container').show();
                 $('main p').hide();
+            } else {
+                $('main p').text('Keine Fragen verfügbar. Bitte erst Fragen erstellen.');
             }
         } catch (error) {
-            console.error('Fehler:', error);
+            console.error('Detaillierter Fehler:', error);
+            if (error.status === 401) {
+                window.location.href = '/html/userNameLoginIndex.html';
+            }
         }
     };
 
     const displayQuestion = (index) => {
         const question = questions[index];
-        // Angepasst an neue Datenbankstruktur
+        if (!question) {
+            console.error('Keine Frage für Index:', index);
+            return;
+        }
+        
         $('#currentQuestion').text(question.question);
         $('#A').text(`A: ${question.answer_a}`);
         $('#B').text(`B: ${question.answer_b}`);
@@ -52,7 +76,6 @@ $(document).ready(() => {
         const selectedAnswer = $(this).attr('id');
         const question = questions[currentQuestionIndex];
         
-        // Angepasst an neue Datenbankstruktur
         if (selectedAnswer === question.correct_answer) {
             correctAnswersCount++;
             $(this).addClass('correct');
@@ -82,6 +105,7 @@ $(document).ready(() => {
 
     $('#nextQuestion').prop('disabled', true);
     
+    // Initialer Auth-Check und Laden der Fragen
     checkAuthAndLoadQuestions();
 });
 

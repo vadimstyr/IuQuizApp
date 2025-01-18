@@ -1,131 +1,217 @@
 $(document).ready(() => {
-    let score = 0;
-    let questions = [];
+    let currentUser = null;
+    let userQuestions = [];
     let currentQuestionIndex = 0;
-    let hasAnswered = false;
 
-    const checkAuthAndLoadQuestions = async () => {
+    // Auth-Check mit erweiterten Debug-Logs
+    const checkAuthAndLoadUser = async () => {
+        console.log('Start: Auth-Check');
         try {
-            const authResponse = await $.get('/api/check-auth');
-            if (!authResponse.isLoggedIn) {
-                window.location.href = '/html/userNameLoginIndex.html';
+            console.log('Sende Auth-Request...');
+            const response = await $.ajax({
+                url: '/api/check-auth',
+                method: 'GET',
+                xhrFields: {
+                    withCredentials: true
+                }
+            });
+            console.log('Auth-Response erhalten:', response);
+
+            if (!response.isLoggedIn) {
+                console.log('Nicht eingeloggt - Weiterleitung wird vorbereitet...');
+                setTimeout(() => {
+                    window.location.href = '/html/userNameLoginIndex.html';
+                }, 2000);
                 return;
             }
-
-            $('#playerInfo').text(`Spieler: ${authResponse.email}`);
-            await loadQuestions();
-            await loadHighscores(); // Ändere loadLeaderboard zu loadHighscores
+            
+            console.log('Login bestätigt für:', response.email);
+            currentUser = response.email;
+            $('#userEmail').text(currentUser);
+            await loadUserQuestions();
         } catch (error) {
-            console.error('Fehler:', error);
+            console.error('Detaillierter Auth-Fehler:', error);
+            setTimeout(() => {
+                window.location.href = '/html/userNameLoginIndex.html';
+            }, 5000);
         }
     };
 
-    const loadQuestions = async () => {
+    // Fragen laden
+    const loadUserQuestions = async () => {
         try {
-            const response = await $.get('/api/all-questions');
-            questions = response;
-            if (questions.length > 0) {
-                displayQuestion(0);
-                updateQuestionCounter();
-            }
+            const response = await $.get('/api/questions');
+            userQuestions = response;
+            updateQuestionCount();
+            displayCurrentQuestion();
+            updateNavigationButtons(); // Neue Funktion
         } catch (error) {
             console.error('Fehler beim Laden der Fragen:', error);
+            showError('Fehler beim Laden der Fragen'); // Neue Funktion
         }
     };
 
-    const loadHighscores = async () => {
-        try {
-            const response = await $.get('/api/highscores');
-            const top5Scores = response.slice(0, 5); // Nur die Top 5 anzeigen
-            const highscoresHtml = top5Scores.map((score, index) => `
-                <div class="highscore-entry">
-                    <span class="rank">${index + 1}.</span>
-                    <span class="player">${score.email}</span>
-                    <span class="score">${score.score} Punkte</span>
-                </div>
-            `).join('');
-            
-            $('.leaderboard').html(`
-                <h2>Bestenliste</h2>
-                <div class="highscore-list">
-                    ${highscoresHtml}
-                </div>
-            `);
-        } catch (error) {
-            console.error('Fehler beim Laden der Bestenliste:', error);
-        }
-     };
-    const displayQuestion = (index) => {
-        const question = questions[index];
-        $('#currentQuestion').text(question.question);
-        $('#A').text(`A: ${question.answerA}`);
-        $('#B').text(`B: ${question.answerB}`);
-        $('#C').text(`C: ${question.answerC}`);
-        $('#D').text(`D: ${question.answerD}`);
-        hasAnswered = false;
-        updateQuestionCounter();
+    // Validierung der Eingaben
+    const validateQuestionData = (questionData) => {
+        if (!questionData.question.trim()) return 'Bitte geben Sie eine Frage ein';
+        if (!questionData.answer_a.trim()) return 'Bitte geben Sie Antwort A ein';
+        if (!questionData.answer_b.trim()) return 'Bitte geben Sie Antwort B ein';
+        if (!questionData.answer_c.trim()) return 'Bitte geben Sie Antwort C ein';
+        if (!questionData.answer_d.trim()) return 'Bitte geben Sie Antwort D ein';
+        return null;
     };
 
-    const updateQuestionCounter = () => {
-        $('#questionCounter').text(`Frage ${currentQuestionIndex + 1} von ${questions.length}`);
-    };
-
-    $('.answer').click(function() {
-        if (hasAnswered) return;
-        hasAnswered = true;
-
-        const selectedAnswer = $(this).attr('id');
-        const question = questions[currentQuestionIndex];
-        
-        if (selectedAnswer === question.correctAnswer) {
-            score += 100;
-            $(this).addClass('correct');
-            $('#score').text(`Punkte: ${score}`);
-        } else {
-            $(this).addClass('incorrect');
-            $(`#${question.correctAnswer}`).addClass('correct');
-        }
-
-        $('#nextQuestion').prop('disabled', false);
-    });
-
-    $('#nextQuestion').click(async () => {
-        if (!hasAnswered && currentQuestionIndex < questions.length) {
-            alert('Bitte wähle erst eine Antwort aus!');
+    // Frage speichern
+    $('#saveQuestion').click(async () => {
+        if (userQuestions.length >= 10) {
+            showError('Sie können maximal 10 Fragen erstellen!');
             return;
         }
-    
+
+        const questionData = {
+            creator_email: currentUser,
+            question: $('#questionInput').val(),
+            answer_a: $('#answerA').val(),
+            answer_b: $('#answerB').val(),
+            answer_c: $('#answerC').val(),
+            answer_d: $('#answerD').val(),
+            correct_answer: $('#correctAnswer').val()
+        };
+
+        const validationError = validateQuestionData(questionData);
+        if (validationError) {
+            showError(validationError);
+            return;
+        }
+
         try {
-            if (currentQuestionIndex >= questions.length - 1) {
-                await $.ajax({
-                    url: '/api/save-score',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ score })
-                });
-                await loadHighscores();
-                showQuizEnd(score);
-            } else {
-                currentQuestionIndex++;
-                $('.answer').removeClass('correct incorrect');
-                displayQuestion(currentQuestionIndex);
-            }
+            const response = await $.ajax({
+                url: '/api/questions',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(questionData)
+            });
+
+            showSuccess('Frage erfolgreich gespeichert!');
+            clearInputs();
+            await loadUserQuestions();
         } catch (error) {
-            console.error('Fehler:', error);
+            console.error('Fehler beim Speichern:', error);
+            showError('Fehler beim Speichern der Frage.');
         }
     });
 
-    const showQuizEnd = (finalScore) => {
-        $('.quiz-container').html(`
-            <div class="quiz-end">
-                <h2>Quiz beendet!</h2>
-                <p>Dein Endergebnis: ${finalScore} Punkte</p>
-                <button onclick="location.reload()" class="restart-button">Nochmal spielen</button>
-                <button onclick="window.location.href='/html/quizMode.html'" class="mode-button">Zurück zur Modusauswahl</button>
-            </div>
-        `);
+    // Frage löschen mit Bestätigung
+    $('#deleteQuestion').click(async () => {
+        if (userQuestions.length === 0) return;
+
+        if (!confirm('Möchten Sie diese Frage wirklich löschen?')) return;
+
+        try {
+            await $.ajax({
+                url: `/api/questions/${userQuestions[currentQuestionIndex].id}`,
+                method: 'DELETE'
+            });
+
+            showSuccess('Frage erfolgreich gelöscht!');
+            await loadUserQuestions();
+        } catch (error) {
+            console.error('Fehler beim Löschen:', error);
+            showError('Fehler beim Löschen der Frage.');
+        }
+    });
+
+    // Frage bearbeiten
+    $('#editQuestion').click(() => {
+        if (userQuestions.length === 0) return;
+
+        const currentQuestion = userQuestions[currentQuestionIndex];
+        $('#questionInput').val(currentQuestion.question);
+        $('#answerA').val(currentQuestion.answer_a);
+        $('#answerB').val(currentQuestion.answer_b);
+        $('#answerC').val(currentQuestion.answer_c);
+        $('#answerD').val(currentQuestion.answer_d);
+        $('#correctAnswer').val(currentQuestion.correct_answer);
+    });
+
+    // Navigation
+    $('#prevQuestion').click(() => {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayCurrentQuestion();
+            updateNavigationButtons();
+        }
+    });
+
+    $('#nextQuestion').click(() => {
+        if (currentQuestionIndex < userQuestions.length - 1) {
+            currentQuestionIndex++;
+            displayCurrentQuestion();
+            updateNavigationButtons();
+        }
+    });
+
+    // Hilfsfunktionen
+    const updateQuestionCount = () => {
+        $('#questionCount').text(userQuestions.length);
+        $('#remainingQuestions').text(10 - userQuestions.length);
     };
 
-    $('#nextQuestion').prop('disabled', true);
-    checkAuthAndLoadQuestions();
+    const displayCurrentQuestion = () => {
+        if (userQuestions.length === 0) {
+            $('#previewQuestion').text('Keine Fragen vorhanden');
+            $('#previewAnswers').empty();
+            $('#correctAnswerDisplay').text('');
+            $('#currentQuestionNumber').text('Frage 0/0');
+            return;
+        }
+
+        const question = userQuestions[currentQuestionIndex];
+        $('#previewQuestion').text(question.question);
+        $('#previewAnswers').html(`
+            <div class="answer">A: ${question.answer_a}</div>
+            <div class="answer">B: ${question.answer_b}</div>
+            <div class="answer">C: ${question.answer_c}</div>
+            <div class="answer">D: ${question.answer_d}</div>
+        `);
+        $('#correctAnswerDisplay').text(`Richtige Antwort: ${question.correct_answer}`);
+        $('#currentQuestionNumber').text(`Frage ${currentQuestionIndex + 1}/${userQuestions.length}`);
+    };
+
+    const updateNavigationButtons = () => {
+        $('#prevQuestion').prop('disabled', currentQuestionIndex === 0);
+        $('#nextQuestion').prop('disabled', currentQuestionIndex === userQuestions.length - 1);
+    };
+
+    const clearInputs = () => {
+        $('#questionInput').val('');
+        $('#answerA').val('');
+        $('#answerB').val('');
+        $('#answerC').val('');
+        $('#answerD').val('');
+        $('#correctAnswer').val('A');
+    };
+
+    const showError = (message) => {
+        $('#errorMessage')
+            .text(message)
+            .removeClass('success-message')
+            .addClass('error-message')
+            .fadeIn()
+            .delay(3000)
+            .fadeOut();
+    };
+
+    const showSuccess = (message) => {
+        $('#errorMessage')
+            .text(message)
+            .removeClass('error-message')
+            .addClass('success-message')
+            .fadeIn()
+            .delay(3000)
+            .fadeOut();
+    };
+
+    // Start mit Auth-Check und User-Load
+    checkAuthAndLoadUser();
 });
