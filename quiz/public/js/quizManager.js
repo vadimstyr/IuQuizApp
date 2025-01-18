@@ -49,26 +49,37 @@ $(document).ready(() => {
         }
     };
 
-    // Verbesserte Frage speichern Funktion
-    // Verbesserte Frage speichern Funktion
-$('#saveQuestion').click(async () => {
-    if (userQuestions.length >= 10) {
-        alert('Sie können maximal 10 Fragen erstellen!');
-        return;
-    }
 
-    // Validierung der Eingaben
-    const question = $('#questionInput').val().trim();
-    const answerA = $('#answerA').val().trim();
-    const answerB = $('#answerB').val().trim();
-    const answerC = $('#answerC').val().trim();
-    const answerD = $('#answerD').val().trim();
-    const correctAnswer = $('#correctAnswer').val().trim();
+    // Verbesserte Frage speichern Funktion
+    $('#saveQuestion').click(async () => {
+        if (userQuestions.length >= 10) {
+            alert('Sie können maximal 10 Fragen erstellen!');
+            return;
+        }
+    
+        // Überprüfen Sie, ob currentUser gesetzt ist
+        if (!currentUser) {
+            console.error('Kein Benutzer eingeloggt');
+            alert('Bitte melden Sie sich erneut an.');
+            return;
+        }
+    
+        // Validierung der Eingaben
+        const question = $('#questionInput').val().trim();
+        const answerA = $('#answerA').val().trim();
+        const answerB = $('#answerB').val().trim();
+        const answerC = $('#answerC').val().trim();
+        const answerD = $('#answerD').val().trim();
+        const correctAnswer = $('#correctAnswer').val().trim().toUpperCase();
 
+    // Validierung für correct_answer
     if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
         alert('Bitte füllen Sie alle Felder aus.');
         return;
     }
+
+    // Debug-Log vor dem Senden
+    console.log('Current User:', currentUser);
 
     const questionData = {
         creator_email: currentUser,
@@ -81,7 +92,7 @@ $('#saveQuestion').click(async () => {
     };
 
     try {
-        console.log('Speichere Frage:', questionData);
+        console.log('Sende Frage mit Daten:', questionData);
         const response = await $.ajax({
             url: '/api/questions',
             method: 'POST',
@@ -89,21 +100,21 @@ $('#saveQuestion').click(async () => {
             data: JSON.stringify(questionData),
             xhrFields: {
                 withCredentials: true
-            },
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
             }
         });
-        console.log('Antwort vom Server:', response);
 
-        alert('Frage erfolgreich gespeichert!');
-        clearInputs();
-        await loadUserQuestions();
+        console.log('Server-Antwort:', response);
+        
+        if (response.success) {
+            alert('Frage erfolgreich gespeichert!');
+            clearInputs();
+            await loadUserQuestions();
+        } else {
+            throw new Error(response.message);
+        }
     } catch (error) {
         console.error('Fehler beim Speichern:', error);
-        console.log('Error Response:', error.responseJSON);
-        alert('Fehler beim Speichern der Frage: ' + (error.responseJSON?.message || error.statusText));
+        alert('Fehler beim Speichern: ' + (error.responseJSON?.message || error.message));
     }
 });
 
