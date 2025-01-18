@@ -7,7 +7,7 @@ $(document).ready(() => {
 
     const checkAuthAndLoadQuestions = async () => {
         try {
-            // API-Endpunkt für Auth-Check
+            // Auth-Check
             const authResponse = await $.ajax({
                 url: '/api/check-auth',
                 method: 'GET',
@@ -22,17 +22,19 @@ $(document).ready(() => {
                 return;
             }
 
-            // API-Endpunkt für Fragen laden
+            // Eigene Fragen laden
             const questionsResponse = await $.ajax({
-                url: '/api/questions',
+                url: '/api/my-quiz-questions', // Neue Route für eigene Fragen
                 method: 'GET',
                 xhrFields: {
                     withCredentials: true
                 }
             });
             
-            questions = questionsResponse;
-            if (questions.length > 0) {
+            if (questionsResponse.success && questionsResponse.questions.length > 0) {
+                questions = questionsResponse.questions;
+                // Fragen zufällig mischen
+                questions = questions.sort(() => Math.random() - 0.5);
                 displayQuestion(0);
                 updateQuestionCounter();
                 $('#nextQuestion').show();
@@ -40,6 +42,8 @@ $(document).ready(() => {
                 $('main p').hide();
             } else {
                 $('main p').text('Keine Fragen verfügbar. Bitte erst Fragen erstellen.');
+                $('#nextQuestion').hide();
+                $('.answer-container').hide();
             }
         } catch (error) {
             console.error('Detaillierter Fehler:', error);
@@ -63,6 +67,7 @@ $(document).ready(() => {
         $('#D').text(`D: ${question.answer_d}`);
         hasAnswered = false;
         updateQuestionCounter();
+        $('#nextQuestion').prop('disabled', true);
     };
 
     const updateQuestionCounter = () => {
@@ -102,8 +107,6 @@ $(document).ready(() => {
             displayQuestion(currentQuestionIndex);
         }
     });
-
-    $('#nextQuestion').prop('disabled', true);
     
     // Initialer Auth-Check und Laden der Fragen
     checkAuthAndLoadQuestions();

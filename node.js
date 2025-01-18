@@ -160,6 +160,36 @@ app.post('/api/questions', async (req, res) => {
    }
 });
 
+app.get('/api/my-quiz-questions', async (req, res) => {
+    try {
+        const userEmail = req.session?.user?.email;
+        
+        if (!userEmail) {
+            return res.json({
+                success: false,
+                message: 'Nicht eingeloggt'
+            });
+        }
+
+        const result = await pool.query(
+            'SELECT * FROM quiz_questions WHERE creator_email = $1',
+            [userEmail]
+        );
+        
+        res.json({
+            success: true,
+            questions: result.rows
+        });
+
+    } catch (error) {
+        console.error('Fehler beim Laden der Quiz-Fragen:', error);
+        res.json({
+            success: false,
+            message: 'Fehler beim Laden der Fragen'
+        });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
    console.log(`Server läuft auf Port ${PORT}`);
