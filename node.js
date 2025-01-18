@@ -64,17 +64,22 @@ app.get('/api/questions', async (req, res) => {
 
 // POST Route zum Speichern von Fragen
 app.post('/api/questions', async (req, res) => {
-    const { creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer } = req.body;
-    
-    if (!question || !answer_a || !answer_b || !answer_c || !answer_d || !correct_answer) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'Alle Felder müssen ausgefüllt sein' 
-        });
-    }
+    console.log('Received request body:', req.body); // Debug-Log
 
     try {
-        const result = await saveQuestion({
+        // Body-Parser Überprüfung
+        if (!req.body) {
+            console.log('Kein Request-Body gefunden');
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Keine Daten empfangen' 
+            });
+        }
+
+        const { creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer } = req.body;
+
+        // Validierung der Eingaben
+        console.log('Erhaltene Daten:', {
             creator_email,
             question,
             answer_a,
@@ -84,15 +89,34 @@ app.post('/api/questions', async (req, res) => {
             correct_answer
         });
 
-        res.json({ 
-            success: true, 
-            question: result 
+        // Prüfen ob alle erforderlichen Felder vorhanden sind
+        if (!creator_email || !question || !answer_a || !answer_b || 
+            !answer_c || !answer_d || !correct_answer) {
+            return res.status(400).json({
+                success: false,
+                message: 'Alle Felder müssen ausgefüllt sein'
+            });
+        }
+
+        // Sicherstellen, dass der body-parser korrekt eingebunden ist
+        const result = await pool.query(
+            `INSERT INTO quiz_questions 
+            (creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) 
+            RETURNING *`,
+            [creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer]
+        );
+
+        res.status(200).json({
+            success: true,
+            data: result.rows[0]
         });
+
     } catch (error) {
-        console.error('Fehler beim Speichern der Frage:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Fehler beim Speichern der Frage' 
+        console.error('Server Error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fehler beim Speichern: ' + error.message
         });
     }
 });

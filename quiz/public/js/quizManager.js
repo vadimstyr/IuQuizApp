@@ -50,53 +50,62 @@ $(document).ready(() => {
     };
 
     // Verbesserte Frage speichern Funktion
-    $('#saveQuestion').click(async () => {
-        if (userQuestions.length >= 10) {
-            alert('Sie können maximal 10 Fragen erstellen!');
-            return;
-        }
+    // Verbesserte Frage speichern Funktion
+$('#saveQuestion').click(async () => {
+    if (userQuestions.length >= 10) {
+        alert('Sie können maximal 10 Fragen erstellen!');
+        return;
+    }
 
-        // Validierung der Eingaben
-        const question = $('#questionInput').val().trim();
-        const answerA = $('#answerA').val().trim();
-        const answerB = $('#answerB').val().trim();
-        const answerC = $('#answerC').val().trim();
-        const answerD = $('#answerD').val().trim();
-        const correctAnswer = $('#correctAnswer').val().trim();
+    // Validierung der Eingaben
+    const question = $('#questionInput').val().trim();
+    const answerA = $('#answerA').val().trim();
+    const answerB = $('#answerB').val().trim();
+    const answerC = $('#answerC').val().trim();
+    const answerD = $('#answerD').val().trim();
+    const correctAnswer = $('#correctAnswer').val().trim();
 
-        if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
-            alert('Bitte füllen Sie alle Felder aus.');
-            return;
-        }
+    if (!question || !answerA || !answerB || !answerC || !answerD || !correctAnswer) {
+        alert('Bitte füllen Sie alle Felder aus.');
+        return;
+    }
 
-        const questionData = {
-            creator_email: currentUser,
-            question: question,
-            answer_a: answerA,
-            answer_b: answerB,
-            answer_c: answerC,
-            answer_d: answerD,
-            correct_answer: correctAnswer
-        };
+    const questionData = {
+        creator_email: currentUser,
+        question: question,
+        answer_a: answerA,
+        answer_b: answerB,
+        answer_c: answerC,
+        answer_d: answerD,
+        correct_answer: correctAnswer
+    };
 
-        try {
-            console.log('Speichere Frage:', questionData);
-            const response = await $.ajax({
-                url: '/api/questions',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(questionData)
-            });
-            console.log('Antwort vom Server:', response);
+    try {
+        console.log('Speichere Frage:', questionData);
+        const response = await $.ajax({
+            url: '/api/questions',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(questionData),
+            xhrFields: {
+                withCredentials: true
+            },
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('Antwort vom Server:', response);
 
-            alert('Frage erfolgreich gespeichert!');
-            clearInputs();
-            await loadUserQuestions();
-        } catch (error) {
-            console.error('Fehler beim Speichern:', error);
-            alert('Fehler beim Speichern der Frage.');
-        }
-    });
+        alert('Frage erfolgreich gespeichert!');
+        clearInputs();
+        await loadUserQuestions();
+    } catch (error) {
+        console.error('Fehler beim Speichern:', error);
+        console.log('Error Response:', error.responseJSON);
+        alert('Fehler beim Speichern der Frage: ' + (error.responseJSON?.message || error.statusText));
+    }
+});
 
     // Frage löschen
     $('#deleteQuestion').click(async () => {
