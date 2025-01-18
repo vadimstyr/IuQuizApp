@@ -64,6 +64,16 @@ const getQuestions = async () => {
 
 const saveQuestion = async (questionData) => {
     try {
+        // Prüfen ob der Benutzer existiert
+        const userCheck = await pool.query(
+            'SELECT email FROM users WHERE email = $1',
+            [questionData.creator_email]
+        );
+        
+        if (userCheck.rows.length === 0) {
+            throw new Error('User not found');
+        }
+
         const query = `
             INSERT INTO quiz_questions 
             (creator_email, question, answer_a, answer_b, answer_c, answer_d, correct_answer)
