@@ -51,24 +51,22 @@ app.get('/api/check-auth', async (req, res) => {
 // GET Route zum Abrufen der Fragen
 app.get('/api/questions', async (req, res) => {
     try {
-        // Prüfen ob User eingeloggt ist
-        if (!req.session?.user?.email) {
-            return res.status(401).json({
-                success: false,
-                message: 'Nicht eingeloggt'
+        // Weniger strenge Überprüfung
+        const userEmail = req.session?.user?.email;
+        
+        // Wenn kein User eingeloggt ist, geben wir leere Liste zurück
+        if (!userEmail) {
+            return res.json({
+                success: true,
+                data: [],
+                message: 'Keine Benutzer-Session'
             });
         }
 
-        const userEmail = req.session.user.email;
-        
-        // SQL-Query mit WHERE-Klausel für creator_email
-        const query = `
-            SELECT * FROM quiz_questions 
-            WHERE creator_email = $1 
-            ORDER BY created_at DESC
-        `;
-        
-        const result = await pool.query(query, [userEmail]);
+        const result = await pool.query(
+            'SELECT * FROM quiz_questions WHERE creator_email = $1 ORDER BY created_at DESC',
+            [userEmail]
+        );
         
         res.json({
             success: true,
@@ -77,9 +75,10 @@ app.get('/api/questions', async (req, res) => {
 
     } catch (error) {
         console.error('Fehler beim Laden der Fragen:', error);
-        res.status(500).json({
+        res.json({
             success: false,
-            message: 'Datenbankfehler: ' + error.message
+            data: [],
+            message: 'Datenbankfehler'
         });
     }
 });

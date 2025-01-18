@@ -52,13 +52,16 @@ $(document).ready(() => {
     
             if (response.success) {
                 userQuestions = response.data;
-                displayQuestions(); // Funktion zum Anzeigen der Fragen
+                displayQuestions();
             } else {
-                throw new Error(response.message);
+                console.warn('Warnung:', response.message);
+                userQuestions = [];
+                displayQuestions();
             }
         } catch (error) {
             console.error('Fehler beim Laden der Fragen:', error);
-            alert('Fehler beim Laden Ihrer Fragen');
+            userQuestions = [];
+            displayQuestions();
         }
     };
 
