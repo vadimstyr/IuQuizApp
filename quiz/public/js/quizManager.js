@@ -174,6 +174,26 @@ $(document).ready(() => {
         }
     });
 
+    const showSuccess = (message) => {
+        $('#errorMessage')
+            .removeClass('error-message')
+            .addClass('success-message')
+            .text(message)
+            .fadeIn()
+            .delay(3000)
+            .fadeOut();
+    };
+    
+    const showError = (message) => {
+        $('#errorMessage')
+            .removeClass('success-message')
+            .addClass('error-message')
+            .text(message)
+            .fadeIn()
+            .delay(3000)
+            .fadeOut();
+    };
+
     // Navigation
     $('#prevQuestion').click(() => {
         if (currentQuestionIndex > 0) {
