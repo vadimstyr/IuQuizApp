@@ -281,6 +281,57 @@ app.get('/api/other-questions', async (req, res) => {
     }
 });
 
+// Speichern eines neuen Highscores
+app.post('/api/leaderboard', async (req, res) => {
+    try {
+        const { score, questions_total, questions_correct } = req.body;
+        const playerEmail = req.session?.user?.email;
+
+        if (!playerEmail) {
+            return res.json({
+                success: false,
+                message: 'Nicht eingeloggt'
+            });
+        }
+
+        const result = await pool.query(
+            'INSERT INTO leaderboard (player_email, score, questions_total, questions_correct) VALUES ($1, $2, $3, $4) RETURNING *',
+            [playerEmail, score, questions_total, questions_correct]
+        );
+
+        res.json({
+            success: true,
+            data: result.rows[0]
+        });
+    } catch (error) {
+        console.error('Fehler beim Speichern des Highscores:', error);
+        res.json({
+            success: false,
+            message: 'Fehler beim Speichern'
+        });
+    }
+});
+
+// Abrufen der Top 10 Highscores
+app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT player_email, score, questions_correct, questions_total FROM leaderboard ORDER BY score DESC LIMIT 10'
+        );
+        
+        res.json({
+            success: true,
+            data: result.rows
+        });
+    } catch (error) {
+        console.error('Fehler beim Laden der Bestenliste:', error);
+        res.json({
+            success: false,
+            message: 'Fehler beim Laden der Bestenliste'
+        });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
    console.log(`Server läuft auf Port ${PORT}`);
