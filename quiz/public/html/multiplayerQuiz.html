@@ -3,29 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz</title>
+    <title>Multiplayer Quiz</title>
     <link rel="icon" type="image/x-icon" href="/picture/TU-Logo.svg">
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <div class="container">
+        <!-- Header-Bereich -->
         <div class="header">
             <div class="logo">
                 <img src="/picture/IU-Logo.svg" width="45" height="45" alt="IU Logo">
             </div>
-            <a href="/html/userName.html" id="loginButton" class="loginUsername">Benutzer</a>
+            <div class="nav-buttons">
+                <a href="/html/quizMode.html" class="nav-button">Zurück</a>
+                <a href="/html/userName.html" class="nav-button">Benutzer</a>
+            </div>
         </div>
 
         <div class="quiz">
             <h1>Multiplayer Quiz</h1>
         </div>
 
+        <!-- Bestenliste -->
         <div class="leaderboard">
             <h2>Bestenliste</h2>
-            <div id="leaderboardList"></div>
+            <div id="leaderboardList">
+                <!-- Hier werden die Top 10 dynamisch eingefügt -->
+            </div>
         </div>
 
+        <!-- Quiz-Bereich -->
         <div class="quiz-container">
             <div class="question-container">
                 <h2 id="currentQuestion"></h2>
