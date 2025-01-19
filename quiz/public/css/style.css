@@ -648,10 +648,8 @@ a {
     color: #ff5e00;
 }
 .question-container {
-    background-color: #ff5e00;
-    padding: 20px;
+    padding: 10px;
     margin: 20px 0;
-    border-radius: 10px;
     text-align: center;
 }
 
