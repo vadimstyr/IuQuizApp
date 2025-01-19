@@ -508,6 +508,7 @@ a {
 .rank {
     font-weight: bold;
     color: #ff5e00;
+    color: black;
 }
 
 .player {
@@ -517,6 +518,7 @@ a {
 
 .score {
     font-weight: bold;
+    color: black;
 }
 .leaderboard {
     background-color: #ffd27f;
