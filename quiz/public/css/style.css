@@ -647,3 +647,16 @@ a {
     font-weight: bold;
     color: #ff5e00;
 }
+.question-container {
+    background-color: #ff5e00;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.question-container h2 {
+    color: #000;
+    margin: 0;
+    font-size: 24px;
+}
