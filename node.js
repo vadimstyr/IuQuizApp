@@ -331,6 +331,46 @@ app.get('/api/leaderboard', async (req, res) => {
         });
     }
 });
+app.put('/api/questions/:id', async (req, res) => {
+    try {
+        const questionId = req.params.id;
+        const userEmail = req.session?.user?.email;
+        const { question, answer_a, answer_b, answer_c, answer_d, correct_answer } = req.body;
+
+        if (!userEmail) {
+            return res.status(401).json({
+                success: false,
+                message: 'Nicht eingeloggt'
+            });
+        }
+
+        const result = await pool.query(
+            `UPDATE quiz_questions 
+             SET question = $1, answer_a = $2, answer_b = $3, answer_c = $4, answer_d = $5, correct_answer = $6
+             WHERE id = $7 AND creator_email = $8
+             RETURNING *`,
+            [question, answer_a, answer_b, answer_c, answer_d, correct_answer, questionId, userEmail]
+        );
+
+        if (result.rows.length > 0) {
+            res.json({
+                success: true,
+                data: result.rows[0]
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                message: 'Frage nicht gefunden oder keine Berechtigung'
+            });
+        }
+    } catch (error) {
+        console.error('Fehler beim Aktualisieren der Frage:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fehler beim Aktualisieren'
+        });
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

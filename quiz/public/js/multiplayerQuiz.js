@@ -3,6 +3,7 @@ $(document).ready(() => {
     let currentQuestionIndex = 0;
     let currentScore = 0;
     let hasAnswered = false;
+    
 
     const loadLeaderboard = async () => {
         try {

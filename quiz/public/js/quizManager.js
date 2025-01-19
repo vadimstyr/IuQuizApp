@@ -2,6 +2,7 @@ $(document).ready(() => {
     let currentUser = null;
     let userQuestions = [];
     let currentQuestionIndex = 0;
+    let editingQuestionId = null;
 
     // Auth-Check Methode
     const checkAuthAndLoadUser = async () => {
@@ -94,39 +95,53 @@ $(document).ready(() => {
 
         const questionData = {
             creator_email: currentUser,
-            question: question,
-            answer_a: answerA,
-            answer_b: answerB,
-            answer_c: answerC,
-            answer_d: answerD,
-            correct_answer: correctAnswer
+            question: $('#questionInput').val().trim(),
+            answer_a: $('#answerA').val().trim(),
+            answer_b: $('#answerB').val().trim(),
+            answer_c: $('#answerC').val().trim(),
+            answer_d: $('#answerD').val().trim(),
+            correct_answer: $('#correctAnswer').val()
         };
 
-        try {
-            console.log('Sende Frage mit Daten:', questionData);
-            const response = await $.ajax({
-                url: '/api/questions',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(questionData),
-                xhrFields: {
-                    withCredentials: true
-                }
-            });
 
-            console.log('Server-Antwort:', response);
-            
-            if (response.success) {
-                alert('Frage erfolgreich gespeichert!');
-                clearInputs();
-                await loadUserQuestions();
+        try {
+            let response;
+            if (editingQuestionId) {
+                // Update existierende Frage
+                response = await $.ajax({
+                    url: `/api/questions/${editingQuestionId}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(questionData)
+                });
             } else {
-                throw new Error(response.message);
+                // Neue Frage erstellen (bestehender Code)
+                response = await $.ajax({
+                    url: '/api/questions',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(questionData)
+                });
+            }
+    
+            if (response.success) {
+                showSuccess(editingQuestionId ? 'Frage aktualisiert!' : 'Frage gespeichert!');
+                clearInputs();
+                editingQuestionId = null; // Reset
+                $('#saveQuestion').text('Frage speichern');
+                await loadUserQuestions();
             }
         } catch (error) {
-            console.error('Fehler beim Speichern:', error);
-            alert('Fehler beim Speichern: ' + (error.responseJSON?.message || error.message));
+            console.error('Fehler:', error);
+            showError('Fehler beim Speichern');
         }
+    });
+
+    // Formular leeren Handler anpassen
+    $('#clearForm').click(() => {
+    clearInputs();
+    editingQuestionId = null;
+    $('#saveQuestion').text('Frage speichern');
     });
 
     // Frage löschen
@@ -229,6 +244,24 @@ $(document).ready(() => {
         $('#correctAnswer').val('A');
     };
 
+    // Bearbeiten-Button Click-Handler
+$('#editQuestion').click(() => {
+    const currentQuestion = userQuestions[currentQuestionIndex];
+    editingQuestionId = currentQuestion.id;
+    
+    // Formular mit aktuellen Werten füllen
+    $('#questionInput').val(currentQuestion.question);
+    $('#answerA').val(currentQuestion.answer_a);
+    $('#answerB').val(currentQuestion.answer_b);
+    $('#answerC').val(currentQuestion.answer_c);
+    $('#answerD').val(currentQuestion.answer_d);
+    $('#correctAnswer').val(currentQuestion.correct_answer);
+    
+    // "Speichern" Button Text ändern
+    $('#saveQuestion').text('Frage aktualisieren');
+});
+
     // Start mit Auth-Check und User-Load
     checkAuthAndLoadUser();
 });
+
