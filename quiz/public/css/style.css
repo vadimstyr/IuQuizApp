@@ -539,8 +539,8 @@ a {
 
 .rank {
     font-weight: bold;
-    color: #ff5e00;
     width: 30px;
+    color: black;
 }
 
 .player {
@@ -550,7 +550,7 @@ a {
 
 .score {
     font-weight: bold;
-    color: #ff5e00;
+    color: black;
 }
 .error-message {
     background-color: #ffebee;
