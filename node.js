@@ -7,6 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'quiz/public')));
 
+// Middleware zum Parsen des JSON-Body
 app.use(session({
     secret: 'quiz-app-secret-2024',
     resave: false,
@@ -18,7 +19,10 @@ app.use(session({
     proxy: true // Wichtig für Heroku
 }));
 
-// Hauptroute für die Startseite
+/**
+ * Route für die Startseite.
+ * - Liefert die Login-Seite aus.
+ */
 app.get('/', (req, res) => {
    res.sendFile(path.join(__dirname, 'quiz/public/html/userNameLoginIndex.html'));
 });
@@ -29,7 +33,10 @@ app.get('/api/test-db', async (req, res) => {
    res.json({ success: isConnected });
 });
 
-// Login-Route
+/**
+ * Login-Route.
+ * - Überprüft die Benutzeranmeldedaten und erstellt eine Session, wenn der Login erfolgreich ist.
+ */
 app.post('/api/login', async (req, res) => {
    const { email, password } = req.body;
    
@@ -59,7 +66,11 @@ app.post('/api/login', async (req, res) => {
    }
 });
 
-// Auth-Check Route
+
+/**
+ * Authentifizierungsprüfung.
+ * - Gibt den Login-Status des Benutzers zurück.
+ */
 app.get('/api/check-auth', async (req, res) => {
    if (req.session?.user?.email) {
        res.json({ 
@@ -73,7 +84,10 @@ app.get('/api/check-auth', async (req, res) => {
    }
 });
 
-// GET Route zum Abrufen der Fragen
+/**
+ * Abrufen der vom Benutzer erstellten Fragen.
+ * - Gibt alle Fragen zurück, die mit der Benutzer-Email verknüpft sind.
+ */
 app.get('/api/questions', async (req, res) => {
    try {
        const userEmail = req.session?.user?.email;
@@ -103,7 +117,10 @@ app.get('/api/questions', async (req, res) => {
    }
 });
 
-// POST Route zum Speichern von Fragen
+/**
+ * Speichern einer neuen Quizfrage.
+ * - Überprüft die Eingaben und speichert die Frage in der Datenbank.
+ */
 app.post('/api/questions', async (req, res) => {
    console.log('Received request body:', req.body);
 
@@ -189,7 +206,10 @@ app.get('/api/my-quiz-questions', async (req, res) => {
         });
     }
 });
-// DELETE Route für Fragen
+/**
+ * Löschen einer Quizfrage.
+ * - Überprüft, ob die Frage dem Benutzer gehört, und löscht sie.
+ */
 app.delete('/api/questions/:id', async (req, res) => {
     try {
         const questionId = req.params.id;
@@ -227,7 +247,10 @@ app.delete('/api/questions/:id', async (req, res) => {
         });
     }
 });
-
+/**
+ * Logout-Route.
+ * - Beendet die Benutzer-Session und meldet den Benutzer ab.
+ */
 app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -243,7 +266,10 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// Route für Fragen von anderen Benutzern
+/**
+ * Route für Fragen von anderen Benutzern.
+ * - Gibt zufällige Fragen zurück, die nicht vom aktuellen Benutzer erstellt wurden.
+ */
 app.get('/api/other-questions', async (req, res) => {
     try {
         const userEmail = req.session?.user?.email;
@@ -371,7 +397,10 @@ app.put('/api/questions/:id', async (req, res) => {
         });
     }
 });
-
+/**
+ * Server starten.
+ * - Testet die Datenbankverbindung und startet den Server.
+ */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
    console.log(`Server läuft auf Port ${PORT}`);

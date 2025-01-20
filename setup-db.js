@@ -9,6 +9,12 @@ const pool = new Pool({
   }
 });
 
+/**
+ * Setup-Funktion für die Datenbank:
+ * - Erstellt die erforderlichen Tabellen, falls sie noch nicht existieren.
+ * - Fügt Testbenutzer in die `users`-Tabelle ein (falls nicht bereits vorhanden).
+ */
+
 async function setupDatabase() {
   const client = await pool.connect();
   

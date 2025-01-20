@@ -8,7 +8,11 @@ const pool = new Pool({
     }
 });
 
-// Test-Funktion für die Verbindung
+/**
+ * Testet die Verbindung zur Datenbank.
+ * - Führt eine einfache SQL-Abfrage aus, um sicherzustellen, dass die Verbindung funktioniert.
+ * - Gibt `true` bei Erfolg und `false` bei einem Fehler zurück.
+ */
 async function testConnection() {
     const client = await pool.connect();
     try {
@@ -23,7 +27,16 @@ async function testConnection() {
     }
 }
 
-// Benutzer-Login überprüfen
+/**
+ * Überprüft den Benutzer-Login.
+ * - Sucht den Benutzer anhand der Email in der Datenbank.
+ * - Vergleicht das eingegebene Passwort mit dem gespeicherten Passwort-Hash.
+ * - Gibt die Benutzerdaten zurück, wenn die Authentifizierung erfolgreich ist, andernfalls `null`.
+ * 
+ * @param {string} email - Die Email des Benutzers.
+ * @param {string} password - Das eingegebene Passwort des Benutzers.
+ * @returns {object|null} Benutzerinformationen oder `null`, wenn die Authentifizierung fehlschlägt.
+ */
 async function checkUser(email, password) {
     const client = await pool.connect();
     try {
@@ -52,6 +65,13 @@ async function checkUser(email, password) {
     }
 }
 
+/**
+ * Ruft alle Quizfragen ab, die vom Benutzer erstellt wurden.
+ * - Sortiert die Fragen nach dem Erstellungsdatum in absteigender Reihenfolge.
+ * 
+ * @param {string} userEmail - Die Email des Benutzers.
+ * @returns {Array} Liste der Fragen, die vom Benutzer erstellt wurden.
+ */
 const getQuestions = async (userEmail) => {
     try {
         const result = await pool.query(
@@ -64,7 +84,14 @@ const getQuestions = async (userEmail) => {
         throw error;
     }
 };
-
+/**
+ * Speichert eine neue Quizfrage in der Datenbank.
+ * - Überprüft zuerst, ob der Benutzer existiert.
+ * - Fügt die Frage in die Tabelle `quiz_questions` ein und gibt die gespeicherte Frage zurück.
+ * 
+ * @param {object} questionData - Die Daten der neuen Quizfrage.
+ * @returns {object} Die gespeicherte Frage.
+ */
 const saveQuestion = async (questionData) => {
     try {
         // Prüfen ob der Benutzer existiert
@@ -100,6 +127,13 @@ const saveQuestion = async (questionData) => {
         throw error;
     }
 };
+/**
+ * Ruft zufällige Quizfragen von anderen Benutzern ab.
+ * - Wählt maximal 10 Fragen aus, die nicht vom aktuellen Benutzer erstellt wurden.
+ * 
+ * @param {string} userEmail - Die Email des aktuellen Benutzers.
+ * @returns {Array} Eine Liste von zufälligen Fragen.
+ */
 const getOtherQuestions = async (userEmail) => {
     try {
         // Zufällige Auswahl von 10 Fragen von anderen Benutzern
@@ -116,7 +150,7 @@ const getOtherQuestions = async (userEmail) => {
         throw error;
     }
 };
-
+// Export der Funktionen und des Pools für die Verwendung in anderen Modulen
 module.exports = {
     pool,
     testConnection,

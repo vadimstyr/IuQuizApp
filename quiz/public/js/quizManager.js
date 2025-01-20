@@ -1,8 +1,16 @@
 $(document).ready(() => {
+    // Initialisiere Variablen für den aktuellen Benutzer, die Fragen des Benutzers, den aktuellen Fragenindex und die ID der bearbeiteten Frage
     let currentUser = null;
     let userQuestions = [];
     let currentQuestionIndex = 0;
     let editingQuestionId = null;
+
+
+        /**
+     * Überprüft die Authentifizierung des Benutzers und lädt die Benutzerinformationen.
+     * - Wenn der Benutzer eingeloggt ist, wird sein Name angezeigt und die Fragen werden geladen.
+     * - Wenn der Benutzer nicht eingeloggt ist, wird er auf die Login-Seite weitergeleitet.
+     */
 
     // Auth-Check Methode
     const checkAuthAndLoadUser = async () => {
@@ -38,7 +46,11 @@ $(document).ready(() => {
         }
     };
 
-    // Fragen laden
+        /**
+     * Lädt die Fragen des Benutzers aus der API und zeigt sie an.
+     * - Wenn keine Fragen vorhanden sind, wird eine leere Liste angezeigt.
+     * - Bei Fehlern wird ein Fehlerprotokoll ausgegeben und die Liste geleert.
+     */
     const loadUserQuestions = async () => {
         try {
             const response = await $.ajax({
@@ -66,7 +78,13 @@ $(document).ready(() => {
         }
     };
 
-    // Frage speichern
+        /**
+     * Speichert eine neue Frage oder aktualisiert eine bestehende Frage.
+     * - Überprüft, ob alle Felder ausgefüllt sind.
+     * - Begrenzt die maximale Anzahl der Fragen auf 10.
+     * - Aktualisiert die Fragenliste nach dem Speichern.
+     */
+
     $('#saveQuestion').click(async () => {
         if (userQuestions.length >= 10) {
             alert('Sie können maximal 10 Fragen erstellen!');
@@ -144,7 +162,10 @@ $(document).ready(() => {
     $('#saveQuestion').text('Frage speichern');
     });
 
-    // Frage löschen
+        /**
+     * Löscht die aktuelle Frage in der Liste.
+     * - Löscht die Frage über die API und lädt die aktualisierte Liste neu.
+     */
     $('#deleteQuestion').click(async () => {
         if (userQuestions.length === 0) return;
     
@@ -183,7 +204,12 @@ $(document).ready(() => {
             .delay(3000)
             .fadeOut();
     };
-    
+
+        /**
+     * Zeigt eine Fehlermeldung an.
+     * @param {string} message - Die anzuzeigende Fehlermeldung.
+     */
+
     const showError = (message) => {
         $('#errorMessage')
             .removeClass('success-message')
@@ -214,6 +240,9 @@ $(document).ready(() => {
         $('.question-counter').text(`(${userQuestions.length}/10)`);
     };
 
+    /**
+     * Aktualisiert die Anzeige der aktuellen Frage basierend auf dem Index.
+     */
     const displayCurrentQuestion = () => {
         // Zähler aktualisieren
         $('#questionCount').text(userQuestions.length);
@@ -255,6 +284,10 @@ $(document).ready(() => {
         displayCurrentQuestion();
     };
 
+    /**
+     * Leert die Eingabefelder für die Erstellung oder Bearbeitung von Fragen.
+     */
+    
     const clearInputs = () => {
         $('#questionInput').val('');
         $('#answerA').val('');

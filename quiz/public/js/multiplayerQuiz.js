@@ -1,10 +1,14 @@
 $(document).ready(() => {
+    // Initialisiere Variablen für Fragen, den aktuellen Index, die Punktzahl und den Beantwortungsstatus
     let questions = [];
     let currentQuestionIndex = 0;
     let currentScore = 0;
     let hasAnswered = false;
     
-
+   /**
+     * Lädt die Bestenliste von der API und zeigt sie auf der Seite an.
+     * Die Bestenliste wird in das HTML-Element mit der ID 'leaderboardList' eingefügt.
+     */
     const loadLeaderboard = async () => {
         try {
             const response = await $.ajax({
@@ -32,6 +36,11 @@ $(document).ready(() => {
         }
     };
 
+    /**
+     * Speichert den aktuellen Punktestand des Benutzers in der API.
+     * Nach erfolgreichem Speichern wird die Bestenliste neu geladen.
+     */    
+
     const saveScore = async () => {
         try {
             await $.ajax({
@@ -54,7 +63,11 @@ $(document).ready(() => {
         }
     };
 
-    // Rest des Codes bleibt gleich
+    /**
+     * Lädt Fragen von anderen Benutzern aus der API und speichert sie in der `questions`-Variable.
+     * Zeigt die erste Frage an oder eine Nachricht, wenn keine Fragen verfügbar sind.
+     */
+
     const loadOtherQuestions = async () => {
         try {
             const response = await $.ajax({
@@ -76,6 +89,10 @@ $(document).ready(() => {
         }
     };
 
+    /**
+     * Aktualisiert die Anzeige der aktuellen Frage, ihrer Antworten und des Punktestandes.
+     * Wird aufgerufen, wenn eine neue Frage angezeigt werden soll.
+     */
     const updateDisplay = () => {
         if (currentQuestionIndex >= questions.length) return;
         
@@ -108,6 +125,12 @@ $(document).ready(() => {
         $('#nextQuestion').prop('disabled', false);
     });
 
+    /**
+     * Wird aufgerufen, wenn der Benutzer auf "Nächste Frage" klickt.
+     * Zeigt die nächste Frage an oder beendet das Quiz, wenn alle Fragen beantwortet wurden.
+     * Beim Beenden wird der Punktestand gespeichert und eine Abschlussnachricht angezeigt.
+     */
+    
     $('#nextQuestion').click(async () => {
         if (!hasAnswered) {
             alert('Bitte wähle erst eine Antwort aus!');

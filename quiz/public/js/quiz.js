@@ -5,6 +5,14 @@ $(document).ready(() => {
     let currentQuestionIndex = 0;
     let hasAnswered = false;
 
+        /**
+     * Überprüft die Authentifizierung des Benutzers und lädt die Fragen für das Quiz.
+     * - Wenn der Benutzer nicht eingeloggt ist, werden die Fragen und Steuerungen ausgeblendet.
+     * - Lädt die eigenen Quizfragen des Benutzers aus der API.
+     * - Mischt die Fragen zufällig, zeigt die erste Frage an und aktualisiert den Zähler.
+     * - Bei Fehlern (z. B. nicht authentifiziert) wird der Benutzer auf die Login-Seite weitergeleitet.
+     */
+
     const checkAuthAndLoadQuestions = async () => {
         try {
             // Auth-Check
@@ -53,6 +61,14 @@ $(document).ready(() => {
         }
     };
 
+    /**
+     * Zeigt die Frage und Antworten basierend auf dem übergebenen Index an.
+     * - Aktualisiert den Text der Frage und ihrer Antworten.
+     * - Setzt den Beantwortungsstatus zurück und deaktiviert den Button "Nächste Frage".
+     * 
+     * @param {number} index - Der Index der aktuellen Frage im `questions`-Array.
+     */
+
     const displayQuestion = (index) => {
         const question = questions[index];
         if (!question) {
@@ -70,9 +86,20 @@ $(document).ready(() => {
         $('#nextQuestion').prop('disabled', true);
     };
 
+    /**
+     * Aktualisiert den Fortschrittszähler, der die aktuelle Frage und die Gesamtanzahl anzeigt.
+     */
+
     const updateQuestionCounter = () => {
         $('.question-counter').text(`Frage ${currentQuestionIndex + 1} von ${questions.length}`);
     };
+
+        /**
+     * Verarbeitet die Antwort des Benutzers, wenn dieser eine Option auswählt.
+     * - Überprüft, ob die Antwort korrekt ist, und markiert sie entsprechend.
+     * - Erhöht die Anzahl der richtigen Antworten bei einer korrekten Auswahl.
+     * - Aktiviert den Button "Nächste Frage".
+     */
 
     $('.answer').click(function() {
         if (hasAnswered) return;
@@ -91,6 +118,12 @@ $(document).ready(() => {
 
         $('#nextQuestion').prop('disabled', false);
     });
+
+    /**
+     * Wird aufgerufen, wenn der Benutzer auf den Button "Nächste Frage" klickt.
+     * - Zeigt die nächste Frage an, wenn noch Fragen übrig sind.
+     * - Beendet das Quiz und zeigt die Ergebnisse an, wenn alle Fragen beantwortet wurden.
+     */
 
     $('#nextQuestion').click(() => {
         if (!hasAnswered && currentQuestionIndex < questions.length) {
@@ -111,6 +144,15 @@ $(document).ready(() => {
     // Initialer Auth-Check und Laden der Fragen
     checkAuthAndLoadQuestions();
 });
+
+/**
+ * Zeigt das Ende des Quiz an und die Ergebnisse des Benutzers.
+ * - Berechnet die Prozentzahl der richtigen Antworten.
+ * - Zeigt Optionen für Neustart oder Rückkehr zum Menü an.
+ * 
+ * @param {number} correctAnswers - Anzahl der richtig beantworteten Fragen.
+ * @param {number} totalQuestions - Gesamtanzahl der Fragen im Quiz.
+ */
 
 function showQuizEnd(correctAnswers, totalQuestions) {
     $('.quiz-container').html(`
