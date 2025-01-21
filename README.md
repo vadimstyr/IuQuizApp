@@ -30,6 +30,7 @@ Eine interaktive Quiz-Anwendung, die es Benutzern ermöglicht, eigene Quiz-Frage
 git clone <repository-url>
 cd <repository-name>
 
+---
 
 ### Abhängigkeiten installieren
 
@@ -39,13 +40,18 @@ npm install pg
 npm install express-session
 npm install bcrypt
 
+---
 # Konfiguration
 
 ## Für Produktionsumgebung (Heroku)
 Die Anwendung ist für die Produktionsumgebung auf Heroku konfiguriert und läuft dort ohne weitere Anpassungen.
 
+---
+
 ## Für lokale Entwicklung
 Für lokales Testing gibt es zwei Möglichkeiten:
+
+---
 
 ### Mit lokaler PostgreSQL Datenbank:
 
@@ -58,7 +64,7 @@ Für lokales Testing gibt es zwei Möglichkeiten:
   NODE_ENV=development
   PORT=3000
 
-
+---
 
 ### Mit Heroku-Datenbank:
 
@@ -67,6 +73,8 @@ Für lokales Testing gibt es zwei Möglichkeiten:
   **Beachten:** Heroku ändert regelmäßig Datenbank-Credentials
 
 **Wichtiger Hinweis:** Für lokales Testing wird Port 3000 verwendet. Stellen Sie sicher, dass dieser Port verfügbar ist oder ändern Sie den Port in der `.env` Datei.
+
+---
 
 ### Server starten
 
