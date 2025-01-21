@@ -29,7 +29,7 @@ Eine interaktive Quiz-Anwendung, die es Benutzern ermöglicht, eigene Quiz-Frage
 ```bash
 git clone <repository-url>
 cd <repository-name>
-
+```
 ---
 
 ### Abhängigkeiten installieren
@@ -39,7 +39,7 @@ npm install express
 npm install pg
 npm install express-session
 npm install bcrypt
-
+```
 ---
 # Konfiguration
 
@@ -62,7 +62,7 @@ Für lokales Testing gibt es zwei Möglichkeiten:
   DATABASE_URL=postgresql://username:password@localhost:5432/quiz_db
   SESSION_SECRET=your-secret
   NODE_ENV=development
-  PORT=3000
+  PORT=3000```
 
 ---
 
@@ -80,6 +80,8 @@ Für lokales Testing gibt es zwei Möglichkeiten:
 
 ```bash
 npm start
+```
+---
 
 # ODER
 node node.js
